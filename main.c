@@ -1,28 +1,33 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "mystd.h"
+#include "calc.h"
+
+#define MAX_INPUT_LENGTH 0xFFFF
 
 
-#define MAX_INPUT_LENGTH 256
+static int check_input_data( char *input_str );
+static void start_init( void );
 
 
-static int check_input_data(char *input_str);
+static char calc_str[MAX_INPUT_LENGTH];
+static int buf_index;
 
+static int paren_start_cnt;
+static int paren_end_cnt;
 
-char calc_str[MAX_INPUT_LENGTH];
-int buf_index;
-
-
-int main(void)
+int main( void )
 {
 	double res=0;
   char in_str[MAX_INPUT_LENGTH];
 
-	while(TRUE) {
+	while( TRUE ) {
+		start_init();
+
 		printf("kill a program input  \"q\". \n");
-		
-		buf_index = 0;
 		printf("input :: ");
+
 		gets( in_str );
 		
 		if( strcmp(in_str, "q") == 0 ) {
@@ -33,7 +38,9 @@ int main(void)
 			continue;
 		}
 
-		printf("\n  calc result => %s \n\n", calc_str);
+		get_RPN( calc_str );
+
+		printf("\n  calc result => %lf \n\n", result_buf[0]);
 	
 	}
 
@@ -44,25 +51,21 @@ int main(void)
 /* スペース取り出して整形 */
 void trim( char *str )
 {
+	if( *str != ' ' ) {
+		calc_str[buf_index++] = *str;
+	}
 
-
-	if( *str != ' ' )
-		{
-			calc_str[buf_index++] = *str;
-		}
-
-	if(*str++) 
-		{
-			trim(str);
-		}
+	if(*str++) {
+		trim(str);
+	}
 }
 
 
-int check_input_data(char *input_str)
+int check_input_data( char *input_str )
 {
 	int i;
 	int str_length = strlen(input_str);
-	BOOL last_load_check;
+	Bool last_load_check;
 
 	if( str_length >= MAX_INPUT_LENGTH ) {
 		printf("\n");
@@ -73,7 +76,6 @@ int check_input_data(char *input_str)
 	
 	/*  スペースを無視して、calc_str にセットする。 */
 	trim(input_str);
-	
 
 	for( i=0; i < MAX_INPUT_LENGTH; i++ ) {
 		if( calc_str[i] == '\0' ) {
@@ -91,15 +93,31 @@ int check_input_data(char *input_str)
 		case '8':
 		case '9':
 		case '0':
+			last_load_check = TRUE;
+			break;
 		case '(':
+			paren_start_cnt++;
+			last_load_check = TRUE;
+			break;
 		case ')':
+			paren_end_cnt++;
 			last_load_check = TRUE;
 			break;
 		case '+':
 		case '-':
 		case '*':
 		case '/':
-			last_load_check = FALSE;
+		case '.':
+			if( last_load_check != TRUE) {
+				printf("\n");
+				printf(" ---[ERROR] input last data error. \n");
+				printf(" ---[ERROR] Please do not put in a sign continuously. \n\n");
+				return FALSE;
+			}
+			else {
+				last_load_check = FALSE;
+			}
+
 			break;
 		default:
 			printf("\n");
@@ -117,20 +135,23 @@ int check_input_data(char *input_str)
 			printf(" ---[ERROR] not support last input '+', '-', '*', '/' \n\n");
 			return FALSE;
 	}
+	
+	if( paren_start_cnt != paren_end_cnt ) {
+		printf("\n");
+		printf(" ---[ERROR] input last data error. \n");
+		printf(" ---[ERROR] Please check consistency of a parenthesis. \n\n");
+		return FALSE;
+	}
 
 	return TRUE;
 }
 
 
-void read_data(void)
+void start_init( void )
 {
-
-}
-
-
-double calc_proc(char *input_str)
-{
-	return 0;
+		buf_index       = 0;
+		paren_start_cnt = 0;
+		paren_end_cnt   = 0;
 }
 
 

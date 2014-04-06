@@ -4,7 +4,7 @@
 #define TRUE  1
 #define FALSE 0
 
-#define BOOL int
+#define Bool int
 
 
 #endif /* __MYSTDH__ */
