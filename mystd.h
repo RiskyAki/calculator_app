@@ -6,5 +6,7 @@
 
 #define Bool int
 
+#define DEBUG_MODE
+#undef  DEBUG_MODE
 
 #endif /* __MYSTDH__ */

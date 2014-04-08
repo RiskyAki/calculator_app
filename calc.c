@@ -25,14 +25,14 @@ char   stack_buf[STACK_BUF_SIZE];
 char   temp_val[STACK_BUF_SIZE];
 
 static void calc_init( void );
-static void pop_stack( int *sp );
+static void pop_stack( int *sp, char input_char );
 static double calc( double a, double b, char ch );
 
 
 priority_type check_priority( char str )
 {
 
-  priority_type ret=0;
+  priority_type ret = PLUS_OR_MINUS;
 
   switch( str ) {
   case '+':
@@ -42,9 +42,6 @@ priority_type check_priority( char str )
   case '*':
   case '/':
     ret = TIMES_OR_DIVID;
-    break;
-  case '(':
-    ret = START_PAREN;
     break;
   default:
     break;
@@ -57,8 +54,6 @@ priority_type check_priority( char str )
 int check_number( char str )
 {
   int ret = TRUE;
-
-  printf("str == %c \n", str);  
 
   switch( str ) {
   case '1':
@@ -74,6 +69,8 @@ int check_number( char str )
   case '.':
     temp_val[temp_val_index] = str;
     temp_val_index++;
+
+    is_last_load_char = FALSE;
     ret = TRUE;
     break;
   case '(':
@@ -85,7 +82,10 @@ int check_number( char str )
     /* ")" の後に来る演算子の場合は、値を追加したくない。 */
     if( is_last_load_char != TRUE ) {
       result_buf[result_index] = atof( &temp_val[0] );
-      printf(" double == %lf, index : %d \n", result_buf[result_index], result_index);
+
+#ifdef DEBUG_MODE
+      printf(" [debug_number] double == %lf, index : %d \n", result_buf[result_index], result_index);
+#endif
 
       result_index++;
     }
@@ -120,7 +120,7 @@ void get_RPN ( char *input )
 
       if( input[i] == ')' ){
 	/* 最初の括弧まで計算。 */
-	pop_stack( &sp );
+	pop_stack( &sp, input[i] );
       }
       else if( input[i] == '(' ){
 	stack_buf[sp++] = input[i];
@@ -139,7 +139,7 @@ void get_RPN ( char *input )
 	    stack_buf[sp++] = input[i];
 	  }
 	  else{
-	    pop_stack( &sp );
+	    pop_stack( &sp, input[i] );
 	    stack_buf[sp++] = input[i];
 	  }
 	}
@@ -148,19 +148,18 @@ void get_RPN ( char *input )
   }
 
 
-  /* last load is not ')'. number changed */
+  /* 最終の文字が ')' でなければ、数値の変換が必要。 */
   if( input[ length-1 ] != ')' ){
-    printf(" [LAST]  result_index :: %d , %s \n", result_index, &temp_val[0]);
     result_buf[result_index++] = atof( &temp_val[0] );
   }
 
-  pop_stack( &sp );
+  pop_stack( &sp, 0 );
 
   return;
 }
 
 
-void pop_stack( int *sp )
+void pop_stack( int *sp, char input_char )
 {
   double a;
   double b;
@@ -171,7 +170,14 @@ void pop_stack( int *sp )
   while( *sp >= 0) {
     if (stack_buf[*sp] == '(') {
       is_last_load_char = TRUE;
-      printf("  ::::: pop break : %c \n", stack_buf[*sp]);
+      
+      /* ")" じゃなかったら、"(" を残しておく必要がある。 */
+      if( input_char != ')') {
+	(*sp)++;
+      }
+#ifdef DEBUG_MODE
+      printf(" [debug_stack] ::::: pop break : %c \n", stack_buf[*sp]);
+#endif
       break;
     }
 
@@ -182,9 +188,9 @@ void pop_stack( int *sp )
     result_buf[result_index]   = calc( a, b, stack_buf[*sp] );
     result_buf[result_index+1] = 0;
 
-    printf(" [debug] sp = %c \n", stack_buf[*sp] );
-    printf(" [debug] res_index = %d, %lf \n",result_index ,result_buf[result_index]);    
-    printf(" [debug] sp_index = %d, %c \n", *sp ,stack_buf[*sp]);
+#ifdef DEBUG_MODE
+    printf(" [debug_stack] res_index = %d, %lf \n",result_index ,result_buf[result_index]);    
+#endif
 
     (*sp)--;
   }
@@ -202,7 +208,9 @@ double calc( double a, double b, char ch )
 
   double result;
 
-  printf(" [calc] %lf, %lf, %c \n", a, b, ch);
+#ifdef DEBUG_MODE
+  printf(" [debug calc] %lf, %lf, %c \n", a, b, ch);
+#endif
 
   switch( ch ) {
   case '+':

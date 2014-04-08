@@ -67,16 +67,25 @@ int check_input_data( char *input_str )
 	int str_length = strlen(input_str);
 	Bool last_load_check;
 
+
+	/* 入力なしの場合 */
+	if( str_length == 0 ) {
+		printf(" ---[ERROR] Please input expression \n\n");
+		return FALSE;
+	}
+
+	/* バッファ以上の入力の場合 */
 	if( str_length >= MAX_INPUT_LENGTH ) {
-		printf("\n");
 		printf(" ---[ERROR] input data error. \n");
 		printf(" ---[ERROR] input data size overflow!! \n\n");
 		return FALSE;
 	}
 	
+	
 	/*  スペースを無視して、calc_str にセットする。 */
 	trim(input_str);
 
+	/* 数式の妥当性評価 */
 	for( i=0; i < MAX_INPUT_LENGTH; i++ ) {
 		if( calc_str[i] == '\0' ) {
 			break;
@@ -101,7 +110,16 @@ int check_input_data( char *input_str )
 			break;
 		case ')':
 			paren_end_cnt++;
-			last_load_check = TRUE;
+			
+			if( last_load_check != TRUE) {
+				printf("\n");
+				printf(" ---[ERROR] input last data error. \n");
+				printf(" ---[ERROR] Please do not put in a sign continuously. \n\n");
+				return FALSE;
+			}
+			else {
+				last_load_check = TRUE;
+			}
 			break;
 		case '+':
 		case '-':
