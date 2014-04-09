@@ -10,4 +10,5 @@
 *.o
 *.exe
 a.out
+output_doc.txt
 

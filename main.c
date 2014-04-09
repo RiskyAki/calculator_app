@@ -31,8 +31,11 @@ int main( void )
 		printf("kill a program input  \"q\". \n");
 		printf("input :: ");
 
-		gets( in_str );
-		
+		/* fgets でとると、最後の文字に改行コードが入るのでそれを削除 */
+		fgets( in_str, MAX_INPUT_LENGTH, stdin);
+    in_str[ strlen(in_str) - 1 ] = '\0';
+
+
 		if( strcmp(in_str, "q") == 0 ) {
 			break;
 		}		
@@ -45,6 +48,8 @@ int main( void )
 
 		printf("\n  calc result => %lf \n\n", result_buf[0]);
 	
+		/* 標準入力を捨てる */
+		fflush(stdin);
 	}
 
 	return 0;
