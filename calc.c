@@ -6,7 +6,8 @@
 
 typedef enum {
   START_PAREN,
-  PLUS_OR_MINUS,
+  PLUS,
+  MINUS,
   TIMES_OR_DIVID,
   END_PAREN,
 } priority_type;
@@ -15,29 +16,41 @@ typedef enum {
 #define RES_BUF_SIZE 0xFFFF
 #define STACK_BUF_SIZE 0xFF
 
-double result_buf[RES_BUF_SIZE];
 
+/* 外部変数*/
+/* 結果保存用バッファ */
+double result_buf[RES_BUF_SIZE];
 static int result_index;
+
+/* 文字を数値に変換するためのテンポラリバッファ */
+static char temp_val[STACK_BUF_SIZE];
 static int temp_val_index;
+
+/* 演算子をスタックするバッファ */
+static char stack_buf[STACK_BUF_SIZE];
+
+/* 読み取り文字が数値かどうかの判定用フラグ */
 static Bool is_last_load_char;
 
-char   stack_buf[STACK_BUF_SIZE];
-char   temp_val[STACK_BUF_SIZE];
 
+/* 関数 */
 static void calc_init( void );
 static void pop_stack( int *sp, char input_char );
 static double calc( double a, double b, char ch );
 
 
+
 priority_type check_priority( char str )
 {
 
-  priority_type ret = PLUS_OR_MINUS;
+  priority_type ret = PLUS;
 
   switch( str ) {
   case '+':
+    ret = PLUS;
+    break;
   case '-':
-    ret = PLUS_OR_MINUS;
+    ret = MINUS;
     break;
   case '*':
   case '/':
@@ -164,6 +177,8 @@ void pop_stack( int *sp, char input_char )
   double a;
   double b;
 
+  /* stack は常に入れることを前提に動いているため */
+  /* 最後に入っている値の場所に戻す必要がある。 */
   (*sp)--;
   result_index--;
 
@@ -195,6 +210,7 @@ void pop_stack( int *sp, char input_char )
     (*sp)--;
   }
 
+  /* スタック全部読み切ったらカウンタ値をリセット */
   if( *sp < 0 ) {
     *sp = 0;
   }

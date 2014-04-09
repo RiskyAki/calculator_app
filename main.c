@@ -6,21 +6,24 @@
 
 #define MAX_INPUT_LENGTH 0xFFFF
 
-
-static int check_input_data( char *input_str );
-static void start_init( void );
-
-
+/* 外部変数 */
 static char calc_str[MAX_INPUT_LENGTH];
 static int buf_index;
 
 static int paren_start_cnt;
 static int paren_end_cnt;
 
+
+/* 関数 */
+static int check_input_data( char *input_str );
+static void start_init( void );
+
+
+
 int main( void )
 {
-	double res=0;
-  char in_str[MAX_INPUT_LENGTH];
+	double res = 0;
+  char  in_str[MAX_INPUT_LENGTH];
 
 	while( TRUE ) {
 		start_init();
@@ -61,6 +64,7 @@ void trim( char *str )
 }
 
 
+/* 入力データの妥当性チェック */
 int check_input_data( char *input_str )
 {
 	int i;
@@ -84,6 +88,7 @@ int check_input_data( char *input_str )
 	
 	/*  スペースを無視して、calc_str にセットする。 */
 	trim(input_str);
+
 
 	/* 数式の妥当性評価 */
 	for( i=0; i < MAX_INPUT_LENGTH; i++ ) {
@@ -126,6 +131,8 @@ int check_input_data( char *input_str )
 		case '*':
 		case '/':
 		case '.':
+		 
+			/* "1++2*5" みたいなのを検知 */
 			if( last_load_check != TRUE) {
 				printf("\n");
 				printf(" ---[ERROR] input last data error. \n");
@@ -138,6 +145,7 @@ int check_input_data( char *input_str )
 
 			break;
 		default:
+			/* 入力対象外データがきたとき  */
 			printf("\n");
 			printf(" ---[ERROR] input data error. \n");
 			printf(" ---[ERROR]  index :%d,  error data :%c \n\n",i , calc_str[i]);
@@ -146,7 +154,7 @@ int check_input_data( char *input_str )
 		}
 	}
 	
-
+	/* 最終文字が数字 or 括弧でない場合はエラー */
 	if( last_load_check == FALSE ) {
 			printf("\n");
 			printf(" ---[ERROR] input last data error. \n");
@@ -154,6 +162,7 @@ int check_input_data( char *input_str )
 			return FALSE;
 	}
 	
+	/* 括弧の整合性がとれてない場合はエラー */
 	if( paren_start_cnt != paren_end_cnt ) {
 		printf("\n");
 		printf(" ---[ERROR] input last data error. \n");
