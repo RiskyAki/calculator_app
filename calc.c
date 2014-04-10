@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <float.h>
 #include "mystd.h"
 
 
@@ -8,7 +9,8 @@ typedef enum {
   START_PAREN,
   PLUS,
   MINUS,
-  TIMES_OR_DIVID,
+  TIMES,
+  DIVID,
   END_PAREN,
 } priority_type;
 
@@ -53,8 +55,10 @@ priority_type check_priority( char str )
     ret = MINUS;
     break;
   case '*':
+    ret = TIMES;
+    break;
   case '/':
-    ret = TIMES_OR_DIVID;
+    ret = DIVID;
     break;
   default:
     break;
@@ -148,7 +152,7 @@ void get_RPN ( char *input )
 
 	  /* 演算子の優先度を確認 */
 	  /* "*", "/" の場合は、スタックに追加 */
-	  if( cur_sign >= stack_sign ){
+	  if( cur_sign > stack_sign ){
 	    stack_buf[sp++] = input[i];
 	  }
 	  else{
@@ -237,9 +241,20 @@ double calc( double a, double b, char ch )
     break;
   case '*':
     result = b * a;
+
+    if( a > (DBL_MAX / b) ) {
+      printf( "Overflow Error!\n" );
+      exit(0);
+    }
     break;
   case '/':
-    result = b / a;
+    if( a != 0 ) {
+      result = b / a;
+    }
+    else {
+      printf(" zero divid Error! \n");
+      exit(0);
+    }
     break;
   default:
     break;

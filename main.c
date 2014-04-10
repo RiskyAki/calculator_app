@@ -63,7 +63,7 @@ void trim( char *str )
 		calc_str[buf_index++] = *str;
 	}
 
-	if(*str++) {
+	if( *str++ != '\0' ) {
 		trim(str);
 	}
 }
@@ -115,15 +115,32 @@ int check_input_data( char *input_str )
 			last_load_check = TRUE;
 			break;
 		case '(':
+			/* "(" の前が演算子でなければエラー */
+			if( last_load_check != FALSE) {
+				printf("\n");
+				printf(" ---[ERROR] input data error. \n");
+				printf(" ---[ERROR] Please input number before start paren . \n\n");
+				return FALSE;
+			}
+
 			paren_start_cnt++;
 			last_load_check = TRUE;
 			break;
 		case ')':
-			paren_end_cnt++;
+			
+			if( paren_start_cnt == 0 ){
+				printf("\n");
+				printf(" ---[ERROR] input data error. \n");
+				printf(" ---[ERROR] Please check consistency of a parenthesis. \n\n");
+				return FALSE;
+			}
+			else {
+				paren_start_cnt--;
+			}
 			
 			if( last_load_check != TRUE) {
 				printf("\n");
-				printf(" ---[ERROR] input last data error. \n");
+				printf(" ---[ERROR] input data error. \n");
 				printf(" ---[ERROR] Please do not put in a sign continuously. \n\n");
 				return FALSE;
 			}
@@ -170,7 +187,7 @@ int check_input_data( char *input_str )
 	/* 括弧の整合性がとれてない場合はエラー */
 	if( paren_start_cnt != paren_end_cnt ) {
 		printf("\n");
-		printf(" ---[ERROR] input last data error. \n");
+		printf(" ---[ERROR] input data error. \n");
 		printf(" ---[ERROR] Please check consistency of a parenthesis. \n\n");
 		return FALSE;
 	}
