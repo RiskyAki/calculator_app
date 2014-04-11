@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <float.h>
+#include <math.h>
 #include "mystd.h"
 
 
@@ -242,7 +243,7 @@ double calc( double a, double b, char ch )
   case '*':
     result = b * a;
 
-    if( a > (DBL_MAX / b) ) {
+    if( fabs(a) > (DBL_MAX / fabs(b) ) ) {
       printf( "Overflow Error!\n" );
       exit(0);
     }
