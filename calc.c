@@ -68,7 +68,7 @@ priority_type check_priority( char str )
 }
 
 
-int check_operator( char str )
+int check_operator_and_convert_number( char str )
 {
   int ret = FALSE;
 
@@ -133,7 +133,7 @@ void get_RPN ( char *input )
   calc_init();
 
   for( i = 0; i < length; i++  ) {
-    if( check_operator( input[i] ) == TRUE ) {
+    if( check_operator_and_convert_number( input[i] ) == TRUE ) {
 
       if( input[i] == ')' ){
 	/* 最初の括弧まで計算。 */

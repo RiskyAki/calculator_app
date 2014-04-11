@@ -1,5 +1,5 @@
 CC=gcc
-CFLAG=-g -W
+CFLAG=-g -Wall -W
 OBJGROUP=main.o calc.o 
 
 all: program
