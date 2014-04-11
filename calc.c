@@ -15,8 +15,8 @@ typedef enum {
 } priority_type;
 
 
-#define RES_BUF_SIZE 0xFFFF
-#define STACK_BUF_SIZE 0xFF
+#define RES_BUF_SIZE   0x100
+#define STACK_BUF_SIZE 0x100
 
 
 /* 外部変数*/
@@ -25,7 +25,7 @@ double result_buf[RES_BUF_SIZE];
 static int result_index;
 
 /* 文字を数値に変換するためのテンポラリバッファ */
-static char temp_val[STACK_BUF_SIZE];
+static char temp_val[RES_BUF_SIZE];
 static int temp_val_index;
 
 /* 演算子をスタックするバッファ */
@@ -68,9 +68,9 @@ priority_type check_priority( char str )
 }
 
 
-int check_number( char str )
+int check_operator( char str )
 {
-  int ret = TRUE;
+  int ret = FALSE;
 
   switch( str ) {
   case '1':
@@ -88,10 +88,10 @@ int check_number( char str )
     temp_val_index++;
 
     is_last_load_char = FALSE;
-    ret = TRUE;
+    ret = FALSE;
     break;
   case '(':
-    ret = FALSE;
+    ret = TRUE;
     break;
   case ')':
   default:
@@ -114,7 +114,7 @@ int check_number( char str )
     memset( &temp_val[0], 0, temp_val_index);
     temp_val_index = 0;
 
-    ret = FALSE;
+    ret = TRUE;
     break;
   }
 
@@ -133,7 +133,7 @@ void get_RPN ( char *input )
   calc_init();
 
   for( i = 0; i < length; i++  ) {
-    if( check_number( input[i] ) == FALSE ) {
+    if( check_operator( input[i] ) == TRUE ) {
 
       if( input[i] == ')' ){
 	/* 最初の括弧まで計算。 */

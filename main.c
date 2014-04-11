@@ -4,7 +4,7 @@
 #include "mystd.h"
 #include "calc.h"
 
-#define MAX_INPUT_LENGTH 0xFFFF
+#define MAX_INPUT_LENGTH 0x100
 
 /* 外部変数 */
 static char calc_str[MAX_INPUT_LENGTH];
@@ -31,9 +31,26 @@ int main( void )
 		printf("kill a program input  \"q\". \n");
 		printf("input :: ");
 
-		/* fgets でとると、最後の文字に改行コードが入るのでそれを削除 */
+
 		fgets( in_str, MAX_INPUT_LENGTH, stdin);
-    in_str[ strlen(in_str) - 1 ] = '\0';
+
+		/* 入力オーバーフロー */
+		if( in_str[ strlen(in_str) - 1 ] != '\n' ) {
+			/* 標準入力を捨てる */
+			/* fflush(stdin); が効かないので、地道に捨てる */
+			while( getchar() != '\n') {
+				;
+			}
+			printf(" ---[ERROR] input data error. \n");
+			printf(" ---[ERROR] input data size overflow!! \n\n");
+
+			continue;
+		}
+		else {
+			/* fgets でとると、最後の文字に改行コードが入るのでそれを削除 */
+			in_str[ strlen(in_str) - 1 ] = '\0';
+		}
+
 
 
 		if( strcmp(in_str, "q") == 0 ) {
@@ -47,9 +64,6 @@ int main( void )
 		get_RPN( calc_str );
 
 		printf("\n  calc result => %lf \n\n", result_buf[0]);
-	
-		/* 標準入力を捨てる */
-		fflush(stdin);
 	}
 
 	return 0;
